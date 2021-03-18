@@ -1,4 +1,4 @@
-(define-module sdff
+(define-module compat.sdff
   (use util.match)
   (use scheme.hash-table :only (hash-table-ref/default))
   (use scheme.list)
@@ -12,7 +12,7 @@
           make-unit-conversion unit:invert
 
           example))
-(select-module sdff)
+(select-module compat.sdff)
 
 ;; Ch2
 

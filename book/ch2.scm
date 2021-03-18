@@ -1,4 +1,4 @@
-(use sdff)
+(use compat.sdff)
 
 ;;;
 ;;; 2.1 Combinators

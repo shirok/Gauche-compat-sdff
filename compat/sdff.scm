@@ -1,3 +1,9 @@
+;;;
+;;;  Support library to run code from "Software Design for Flexibility"
+;;;
+;;;  Public Domain
+;;;
+
 (define-module compat.sdff
   (use util.match)
   (use scheme.hash-table :only (hash-table-ref/default))

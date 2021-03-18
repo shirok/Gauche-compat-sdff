@@ -1,1 +1,6 @@
 Gauche Scheme code for "Software Design for Flexibility" by Chris Hanson and Gerald Jey Sussman
+
+The module compat.sdff defines support procedures and macros needed to
+run the code in the book.
+
+The code book/*.scm has the actual code from the book.

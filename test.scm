@@ -7,6 +7,7 @@
 (test-start "compat.sdff")
 (use compat.sdff)
 (test-module 'compat.sdff)
+(test-module 'compat.sdff.checker)
 
 (load "book/ch2.scm")
 

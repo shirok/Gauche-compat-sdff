@@ -5,9 +5,10 @@
 ;;;
 
 (define-module compat.sdff
-  (use util.match)
   (use scheme.hash-table :only (hash-table-ref/default))
   (use scheme.list)
+
+  (extend compat.sdff.checker)
 
   (export list-head list-tail
           procedure-arity procedure-arity-min procedure-arity-max
@@ -16,6 +17,7 @@
           hash-table-ref/default        ;scheme.hash-table
           lset=                         ;scheme.list
           make-unit-conversion unit:invert
+
 
           example))
 (select-module compat.sdff)

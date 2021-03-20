@@ -20,7 +20,8 @@ INSTALL        = "@GAUCHE_INSTALL@" -C
 PACKAGE   = Gauche-compat-sdff
 
 TARGET    =
-SCMFILES  = $(srcdir)/compat/sdff.scm
+SCMFILES  = $(srcdir)/compat/sdff.scm \
+	    $(srcdir)/compat/sdff/checker.scm
 
 GENERATED =
 CONFIG_GENERATED = Makefile config.cache config.log config.status \

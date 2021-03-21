@@ -8,8 +8,6 @@
   (use scheme.hash-table :only (hash-table-ref/default))
   (use scheme.list)
 
-  (extend compat.sdff.checker)
-
   (export list-head list-tail
           procedure-arity procedure-arity-min procedure-arity-max
           make-key-weak-eqv-hash-table assert

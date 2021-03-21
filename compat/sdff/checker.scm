@@ -33,13 +33,20 @@
 
 (define-class <board> ()
   ((pieces :init-form '() :init-keyword :pieces) ;list of pieces
-   (current-turn :init-form 'dark)))    ;dark or light
+   (current-turn :init-form 'dark :init-keyword :current-turn))) ;dark or light
 (define-method write-object ((b <board>) port)
   (format port "#<board turn=~a\n" (~ b'current-turn))
   (draw-board b port)
   (format port ">"))
 
-(define (current-pieces board) (~ board'pieces))
+(define (flip-turn turn)
+  (case turn
+    [(dark) 'light]
+    [(light) 'dark]))
+
+(define (current-pieces board)
+  (filter (lambda (p) (eq? (~ p'owner) (~ board'current-turn)))
+          (~ board'pieces)))
 
 (define (is-position-on-board? coords board)
   (match-let1 (row . column) coords
@@ -101,17 +108,27 @@
    (prev-board :init-keyword :prev-board)
    (next-piece :init-keyword :next-piece)
    (next-board :init-keyword :next-board)))
+(define-method write-object ((obj <step>) port)
+  (format port "#<step ~a ~a ~a→~a>"
+          (~ obj'kind)
+          (~ obj'prev-piece'owner)
+          (~ obj'prev-piece'coords)
+          (~ obj'next-piece'coords)))
 
 (define (step-to step) (~ step'next-piece))
 
 (define (step-board step) (~ step'next-board))
 
+;; for simple move and jump, we set the current-turn of the next-board
+;; to the opponent of the moved piece.  however, the original player
+;; may be able to make consecutive jumps.
 (define (make-simple-move new-coords piece board)
   (let* ([new-piece (make <piece>
                       :owner (~ piece'owner)
                       :coords new-coords
                       :crowned? (~ piece'crowned?))]
          [new-board (make <board>
+                      :current-turn (flip-turn (~ piece'owner))
                       :pieces (cons new-piece
                                     (delete piece (~ board'pieces))))])
     (make <step>
@@ -128,6 +145,7 @@
                       :coords new-coords
                       :crowned? (~ piece'crowned?))]
          [new-board (make <board>
+                      :current-turn (flip-turn (~ piece'owner))
                       :pieces (cons new-piece
                                     (delete piece
                                             (delete piece-to-remove
@@ -141,6 +159,7 @@
 
 (define (replace-piece new-piece old-piece board)
   (let ([new-board (make <board>
+                     :current-turn (~ board'current-turn)
                      :pieces (cons new-piece
                                    (delete old-piece (~ board'pieces))))])
     (make <step>

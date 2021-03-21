@@ -494,8 +494,7 @@
 ;;;
 
 (define (try-step piece board direction path)
-  (let ((new-coords
-         (coords+ (piece-coords piece) direction)))
+  (let ((new-coords (coords+ (piece-coords piece) direction)))
     (and (is-position-on-board? new-coords board)
          (case (position-info new-coords board)
            ((unoccupied)

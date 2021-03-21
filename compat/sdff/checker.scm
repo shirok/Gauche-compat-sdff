@@ -19,9 +19,12 @@
 ;; NB: All objects are immutable.
 
 ;; Checker Board
-;;  - Row and column numbers are 0-based, (0,0) being lower-left.
-;;  - 'Dark' side takes lower, 'light' side takes upper.
+;;  - Row and column numbers are 0-based, (0,0) being lower-left, relative
+;;    to players.
 ;;  - Placeable squares are where (column + row) is even.
+
+;; Piece
+;;  - Has owner (player's color), and coordinate, relative to the owner.
 
 (define checker-rows 8)
 (define checker-cols 8)
@@ -44,6 +47,16 @@
     [(dark) 'light]
     [(light) 'dark]))
 
+(define (reinterpret-coords piece current-turn)
+  (if (eq? (~ piece'owner) current-turn)
+    (~ piece'coords)
+    (let ((c (~ piece'coords)))
+      (cons (- checker-rows (car c) 1)
+            (- checker-cols (cdr c) 1)))))
+
+(define (piece-coords-relative piece board)
+  (reinterpret-coords piece (~ board'current-turn)))
+
 (define (current-pieces board)
   (filter (lambda (p) (eq? (~ p'owner) (~ board'current-turn)))
           (~ board'pieces)))
@@ -55,7 +68,9 @@
          (even? (+ row column)))))
 
 (define (board-get coords board)
-  (find (lambda (p) (equal? (~ p'coords) coords)) (~ board'pieces)))
+  (find (lambda (p)
+          (equal? (piece-coords-relative p board) coords))
+        (~ board'pieces)))
 
 (define (position-info coords board)
   (let ([piece (board-get coords board)]
@@ -88,9 +103,7 @@
 
 (define (should-be-crowned? piece)
   (and (not (~ piece'crowned?))
-       (case (~ piece'owner)
-         [(dark) (= (car (~ piece'coords)) (- checker-rows 1))]
-         [(light) (= (car (~ piece'coords)) 0)])))
+       (= (car (~ piece'coords)) (- checker-rows 1))))
 
 (define (crown-piece piece)
   (make <piece> :owner (~ piece'owner) :coords (~ piece'coords) :crowned? #t))
@@ -98,9 +111,7 @@
 (define (possible-directions piece)
   (if (~ piece'crowned?)
     '((1 . 1) (1 . -1) (-1 . 1) (-1 . -1))
-    (case (~ piece'owner)
-      [(dark) '((1 . 1) (1 . -1))]
-      [(light) '((-1 . 1) (-1 . -1))])))
+    '((1 . 1) (1 . -1))))
 
 (define-class <step> ()
   ((kind :init-keyword :kind)           ;'move, 'jump or 'replace
@@ -178,15 +189,6 @@
 ;; Note: We use Unicode Box-Drawing character.  Make sure your terminal's
 ;; encoding setting.
 
-(define (sort-pieces pieces)
-  (sort pieces (lambda (pa pb)
-                 (let ([a (~ pa'coords)]
-                       [b (~ pb'coords)])
-                   (cond [(> (car a) (car b))] ;greater row first
-                         [(= (car a) (car b))  ;same row
-                          (< (cdr a) (cdr b))] ;smaller column first
-                         [else #f])))))
-
 (define (draw-board board :optional (port (current-output-port)))
   (define (draw-separator border) ; border: top, middle, bottom
     (receive (left mid right)
@@ -213,34 +215,25 @@
                  (display #\u25cb))]))  ;○
   (define (draw-empty)
     (display #\space))
-  (define (draw-row row pieces)         ;returns undrawn pieces
+  (define (draw-row row)
     (format #t "~a\u2502" row)          ;│
-    (let loop ([col 0] [pieces pieces])
-      (if (= col checker-cols)
-        (begin (newline)
-               pieces)
-        (or (and-let* ([ (pair? pieces) ]
-                       [coords (piece-coords (car pieces))]
-                       [ (and (= (car coords) row)
-                              (= (cdr coords) col)) ])
-              (draw-piece (car pieces))
-              (display #\u2502)         ;│
-              (loop (+ col 1) (cdr pieces)))
-            (begin
-              (draw-empty)
-              (display #\u2502)         ;│
-              (loop (+ col 1) pieces))))))
+    (dotimes [col checker-cols]
+      (if-let1 piece (board-get (cons row col) board)
+        (draw-piece piece)
+        (draw-empty))
+      (display #\u2502))                ;│
+    (newline))
 
   (with-output-to-port port
     (^[]
       (display " ")
       (dotimes [c checker-cols] (format #t " ~a" c))
       (newline)
-      (let loop ([row (- checker-rows 1)]
-                 [pieces (sort-pieces (~ board'pieces))])
+      (let loop ([row (- checker-rows 1)])
         (when (>= row 0)
           (draw-separator (if (= row (- checker-rows 1)) 'top 'middle))
-          (loop (- row 1) (draw-row row pieces))))
+          (draw-row row)
+          (loop (- row 1))))
       (draw-separator 'bottom)
       (values))))
 
@@ -257,6 +250,6 @@
   (make-board '((0 0) (0 2) (0 4) (0 6)
                 (1 1) (1 3) (1 5) (1 7)
                 (2 0) (2 2) (2 4) (2 6))
-              '((5 1) (5 3) (5 5) (5 7)
-                (6 0) (6 2) (6 4) (6 6)
-                (7 1) (7 3) (7 5) (7 7))))
+              '((0 0) (0 2) (0 4) (0 6)
+                (1 1) (1 3) (1 5) (1 7)
+                (2 0) (2 2) (2 4) (2 6))))

@@ -499,7 +499,7 @@
     (and (is-position-on-board? new-coords board)
          (case (position-info new-coords board)
            ((unoccupied)
-            (and (not (path-contains-jump? path))
+            (and (not (path-contains-jumps? path))
                  (cons (make-simple-move new-coords piece board)
                        path)))
            ((occupied-by-opponent)
@@ -508,7 +508,7 @@
                    (is-position-unoccupied? landing board)
                    (cons (make-jump landing new-coords piece board)
                          path))))
-           ((occupied-by-self #f))
+           ((occupied-by-self) #f)
            (else (error "Unknown position info"))))))
 
 (define (compute-next-steps piece board path)
@@ -518,7 +518,7 @@
 
 (define (evolve-paths piece board)
   (let ((paths (compute-next-steps piece board '())))
-    (let ((jumps (filter path-contains-jump? paths)))
+    (let ((jumps (filter path-contains-jumps? paths)))
       (if (null? jumps)
         paths
         (evolve-jumps jumps)))))
@@ -558,3 +558,5 @@
                    path)
              path)))
        paths))
+
+;; Utility for testing

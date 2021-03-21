@@ -35,7 +35,7 @@
   ((pieces :init-form '() :init-keyword :pieces) ;list of pieces
    (current-turn :init-form 'dark)))    ;dark or light
 (define-method write-object ((b <board>) port)
-  (format port "#<board\n")
+  (format port "#<board turn=~a\n" (~ b'current-turn))
   (draw-board b port)
   (format port ">"))
 

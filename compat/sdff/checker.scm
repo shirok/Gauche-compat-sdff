@@ -187,11 +187,11 @@
   (define (draw-piece piece)
     (case (~ piece'owner)
       [(dark)  (if (~ piece'crowned?)
-                 (display #\u25cf)      ;✪
-                 (display #\u272b))]    ;●
+                 (display #\u272a)      ;✪
+                 (display #\u25cf))]    ;●
       [(light) (if (~ piece'crowned?)
-                 (display #\u25cb)      ;✫
-                 (display #\u272a))]))  ;○
+                 (display #\u272b)      ;✫
+                 (display #\u25cb))]))  ;○
   (define (draw-empty)
     (display #\space))
   (define (draw-row row pieces)         ;returns undrawn pieces

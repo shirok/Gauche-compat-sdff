@@ -80,7 +80,7 @@
   (let ((moves (generate-moves board)))
     (display "Possible moves:\n")
     (for-each (lambda (i path)
-                (format #t " ~2d: ~s\n" i path))
+                (format #t " ~2d: ~s\n" i (reverse path)))
               (iota (length moves)) moves)
     (format #t "What now? [0-~a]: " (- (length moves) 1))
     (flush)
@@ -91,7 +91,7 @@
           (if (and (integer? num)
                    (<= 0 num (- (length moves) 1)))
             (let1 move (list-ref moves num)
-              (game-repl (step-board (car move))))
+              (game-repl (flip-turn (step-board (car move)))))
             (begin
               (display "Hun?\n")
               (game-repl board))))))))

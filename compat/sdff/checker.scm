@@ -8,7 +8,7 @@
           step-to step-board make-simple-move make-jump
           replace-piece path-contains-jumps? coords+
 
-          make-board initial-board draw-board
+          make-board initial-board draw-board flip-turn
           ))
 (select-module compat.sdff.checker)
 
@@ -41,11 +41,6 @@
   (format port "#<board turn=~a\n" (~ b'current-turn))
   (draw-board b port)
   (format port ">"))
-
-(define (flip-turn turn)
-  (case turn
-    [(dark) 'light]
-    [(light) 'dark]))
 
 (define (reinterpret-coords piece current-turn)
   (if (eq? (~ piece'owner) current-turn)
@@ -139,7 +134,7 @@
                       :coords new-coords
                       :crowned? (~ piece'crowned?))]
          [new-board (make <board>
-                      :current-turn (flip-turn (~ piece'owner))
+                      :current-turn (~ board'current-turn)
                       :pieces (cons new-piece
                                     (delete piece (~ board'pieces))))])
     (make <step>
@@ -156,7 +151,7 @@
                       :coords new-coords
                       :crowned? (~ piece'crowned?))]
          [new-board (make <board>
-                      :current-turn (flip-turn (~ piece'owner))
+                      :current-turn (~ board'current-turn)
                       :pieces (cons new-piece
                                     (delete piece
                                             (delete piece-to-remove
@@ -253,3 +248,11 @@
               '((0 0) (0 2) (0 4) (0 6)
                 (1 1) (1 3) (1 5) (1 7)
                 (2 0) (2 2) (2 4) (2 6))))
+
+;; Necessary to make the game work.
+(define (flip-turn board)
+  (make <board>
+    :pieces (~ board'pieces)
+    :current-turn (case (~ board'current-turn)
+                    [(dark) 'light]
+                    [(light) 'dark])))

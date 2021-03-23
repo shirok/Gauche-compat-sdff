@@ -16,6 +16,10 @@
 (load "book/ch2-3.scm")
 (load "book/ch2-4.scm")
 
+(use compat.sdff.checker2)
+(test-module 'compat.sdff.checker2)
+
+
 ;; If you don't want `gosh' to exit with nonzero status even if
 ;; the test fails, pass #f to :exit-on-failure.
 (test-end :exit-on-failure #t)
